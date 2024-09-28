@@ -13,14 +13,14 @@
 
 buildPythonApplication rec {
   pname = "pricehist";
-  version = "1.4.7";
+  version = "1.4.12";
   format = "pyproject";
 
   src = fetchFromGitLab {
     owner = "chrisberkhout";
     repo = "pricehist";
     rev = version;
-    hash = "sha256-SBRJxNnA+nOxO6h97WZZHwhxoXeNtb5+rDayn4Hw6so=";
+    hash = "sha256-XcwF7tjPuNi+VHD/wDq4N9fZ0E3d75eTGri07opyHpQ=";
   };
 
   propagatedBuildInputs = [
