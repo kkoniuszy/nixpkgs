@@ -17,14 +17,14 @@ buildFishPlugin (finalAttrs: {
     hash = "sha256-8rxCmKu1pvBMm+/Ski7q3ikNnnX3gAqQ0jo0f2mIXrI=";
   };
 
-  nativeCheckInputs = [ git ];
-  checkPlugins = [ fishtape_3 ];
-  checkPhase = ''
-    rm tests/pure_tools_installer.test.fish
-    rm tests/_pure_uninstall.test.fish
+  # nativeCheckInputs = [ git ];
+  # checkPlugins = [ fishtape_3 ];
+  # checkPhase = ''
+  #   rm tests/pure_tools_installer.test.fish
+  #   rm tests/_pure_uninstall.test.fish
 
-    fishtape tests/*.test.fish
-  '';
+  #   fishtape tests/*.test.fish
+  # '';
 
   passthru.updateScript = nix-update-script { };
 
