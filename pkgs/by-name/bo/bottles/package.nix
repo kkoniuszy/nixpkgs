@@ -112,6 +112,10 @@ let
         libgpg-error
         p11-kit
         zlib # Freetype
+
+        # For winewayland
+        wayland
+        libxkbcommon
       ]
       ++ xorgDeps pkgs
       ++ gstreamerDeps pkgs
