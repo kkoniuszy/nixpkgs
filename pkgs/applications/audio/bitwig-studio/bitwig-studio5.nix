@@ -4,6 +4,7 @@
   alsa-lib,
   atk,
   cairo,
+  curl,
   dpkg,
   fontconfig,
   ffmpeg,
@@ -59,6 +60,7 @@ stdenv.mkDerivation (finalAttrs: {
     alsa-lib
     atk
     cairo
+    curl
     fontconfig
     freetype
     gdk-pixbuf
