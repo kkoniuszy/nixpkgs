@@ -1,0 +1,83 @@
+From fe05fb2114e1e737b14ddc69df80e0034c06f46f Mon Sep 17 00:00:00 2001
+From: nobody <nobody@localhost>
+Date: Fri, 12 Jun 2026 13:29:12 +0200
+Subject: [PATCH] settings: debounce appearance changes
+
+---
+ src/settings.cpp | 33 ++++++++++++++++++++++++++++++---
+ 1 file changed, 30 insertions(+), 3 deletions(-)
+
+diff --git a/src/settings.cpp b/src/settings.cpp
+index 98a99bc7..0d26c7cf 100644
+--- a/src/settings.cpp
++++ b/src/settings.cpp
+@@ -15,7 +15,7 @@
+ #include <QDBusContext>
+ #include <QDBusMessage>
+ #include <QDBusMetaType>
+-#include <QPalette>
++#include <QTimer>
+ 
+ #include <KConfigGroup>
+ #include <KConfigWatcher>
+@@ -216,12 +216,20 @@ class FdoAppearanceSettings : public SettingsModule
+ public:
+     explicit FdoAppearanceSettings(QObject *parent = nullptr)
+         : SettingsModule(parent)
++        , m_appearanceDebounceTimer(new QTimer(this))
+     {
+         qDBusRegisterMetaType<AccentColorArray>();
+         connect(qGuiApp, &QGuiApplication::paletteChanged, this, &FdoAppearanceSettings::onPaletteChanged);
+ 
+         m_kdeglobalsWatcher = KConfigWatcher::create(KSharedConfig::openConfig(u"kdeglobals"_s));
+         connect(m_kdeglobalsWatcher.get(), &KConfigWatcher::configChanged, this, &FdoAppearanceSettings::kdeglobalsChanged);
++
++        m_appearanceDebounceTimer->setSingleShot(true);
++        m_appearanceDebounceTimer->setInterval(100);
++        connect(m_appearanceDebounceTimer, &QTimer::timeout, this, &FdoAppearanceSettings::emitAppearanceChanged);
++
++        m_lastColorScheme = readFdoColorScheme().variant().toUInt();
++        m_lastAccentColor = readAccentColor().variant().value<AccentColorArray>();
+     }
+ 
+     inline QString group() final
+@@ -295,8 +303,24 @@ private:
+ private Q_SLOTS:
+     void onPaletteChanged()
+     {
+-        Q_EMIT settingChanged(group(), colorScheme, readFdoColorScheme());
+-        Q_EMIT settingChanged(group(), accentColor, readAccentColor());
++        m_appearanceDebounceTimer->start();
++    }
++
++    void emitAppearanceChanged()
++    {
++        const auto newColorScheme = readFdoColorScheme();
++        const uint newColorSchemeValue = newColorScheme.variant().toUInt();
++        if (newColorSchemeValue != m_lastColorScheme) {
++            m_lastColorScheme = newColorSchemeValue;
++            Q_EMIT settingChanged(group(), colorScheme, newColorScheme);
++        }
++
++        const auto newAccentColor = readAccentColor();
++        const AccentColorArray newAccent = newAccentColor.variant().value<AccentColorArray>();
++        if (newAccent.r != m_lastAccentColor.r || newAccent.g != m_lastAccentColor.g || newAccent.b != m_lastAccentColor.b) {
++            m_lastAccentColor = newAccent;
++            Q_EMIT settingChanged(group(), accentColor, newAccentColor);
++        }
+     }
+ 
+     void kdeglobalsChanged(const KConfigGroup &configGroup, const QByteArrayList &names)
+@@ -308,6 +332,9 @@ private Q_SLOTS:
+ 
+ private:
+     KConfigWatcher::Ptr m_kdeglobalsWatcher;
++    QTimer *const m_appearanceDebounceTimer;
++    uint m_lastColorScheme;
++    AccentColorArray m_lastAccentColor;
+ };
+ 
+ class KDEGlobalsSettings : public SettingsModule
+-- 
+2.54.0
+
