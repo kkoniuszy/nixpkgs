@@ -296,10 +296,13 @@ in
     xdg.icons.fallbackCursorThemes = mkDefault [ "breeze_cursors" ];
 
     xdg.portal.enable = true;
+    # Don't include xdg-desktop-portal-gtk: KDE's portal already covers all relevant
+    # interfaces, and the GTK portal causes duplicate Settings signals that confuse
+    # Chromium v142+ (and Electron apps) when detecting theme changes.
+    # https://issues.chromium.org/issues/462191707
     xdg.portal.extraPortals = [
       kdePackages.kwallet
       kdePackages.xdg-desktop-portal-kde
-      pkgs.xdg-desktop-portal-gtk
     ];
     xdg.portal.configPackages = mkDefault [ kdePackages.plasma-workspace ];
     services.pipewire.enable = mkDefault true;
