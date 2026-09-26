@@ -4,8 +4,10 @@
   autoPatchelfHook,
   bubblewrap,
   cairo,
+  curl,
   dpkg,
   fetchurl,
+  fontconfig,
   freetype,
   gdk-pixbuf,
   glib,
@@ -59,6 +61,8 @@ stdenv.mkDerivation (finalAttrs: {
   buildInputs = [
     atk
     cairo
+    curl
+    fontconfig
     freetype
     gdk-pixbuf
     glib
