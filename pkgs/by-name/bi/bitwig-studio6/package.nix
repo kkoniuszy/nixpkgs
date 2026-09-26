@@ -110,6 +110,17 @@ stdenv.mkDerivation (finalAttrs: {
       wrapper = writeShellScript "bitwig-studio" ''
         set -e
 
+        exLibs="${lib.strings.makeLibraryPath finalAttrs.buildInputs}"
+
+        # Plugins (VST/CLAP) are dlopen'd at runtime by the engine and are
+        # not patchelf'd, so they need the shared libs (e.g. fontconfig, curl)
+        # findable via LD_LIBRARY_PATH.
+        if [ -n "$LD_LIBRARY_PATH" ]; then
+          export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$exLibs"
+        else
+          export LD_LIBRARY_PATH="$exLibs"
+        fi
+
         currentDir="$(cd "$(dirname "$0")" && pwd)"
         outDir="$(cd "$currentDir/.." && pwd)"
 
